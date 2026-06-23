@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream text-ink font-body antialiased;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(212, 175, 55, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 90%, rgba(200, 16, 46, 0.03) 0%, transparent 50%);
+  }
+
+  /* Grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+}
+
+@layer components {
+  .nav-link {
+    @apply relative px-4 py-2 text-sm font-medium tracking-wide uppercase transition-all;
+  }
+  .nav-link::after {
+    content: '';
+    @apply absolute left-1/2 -bottom-0.5 w-0 h-0.5 bg-accent transition-all duration-300;
+    transform: translateX(-50%);
+  }
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    @apply w-full;
+  }
+
+  .btn-primary {
+    @apply bg-ink text-cream px-6 py-3 font-medium tracking-wider uppercase text-sm
+           transition-all duration-300 hover:bg-accent;
+  }
+
+  .card {
+    @apply bg-white/60 backdrop-blur-sm border border-ink/10 rounded-sm;
+  }
+
+  .stat-number {
+    @apply font-display text-5xl text-ink leading-none;
+  }
+}

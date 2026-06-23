@@ -1,0 +1,55 @@
+# ── Python ──────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+.venv
+env/
+venv/
+*.egg-info/
+
+# ── PyTorch — fichiers lourds ────────────────
+*.pt
+*.pth
+
+# ── Données — fichiers lourds ─────────────────
+players_final.csv
+players_24.csv
+players_statsbomb.csv
+interactions.csv
+resultats_jamais_vus.csv
+composition_finale.csv
+evaluation_results.csv
+evaluation_report.txt
+split_masks.pt
+dataset_gnn/
+events/
+PFA/
+
+# ── Sécurité — ne JAMAIS versionner ─────────
+backend/users.json
+.env.local
+.env.production
+*.key
+*.pem
+
+# ── Node.js ──────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ── OS ───────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDE ──────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Tests ────────────────────────────────────
+.pytest_cache/
+htmlcov/
+.coverage

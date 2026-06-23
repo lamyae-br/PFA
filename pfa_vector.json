@@ -1,0 +1,20 @@
+{
+  "pace": 0.8,
+  "shooting": 0.7,
+  "passing": 0.82,
+  "dribbling": 0.78,
+  "defending": 0.72,
+  "physic": 0.8,
+  "power_stamina": 0.88,
+  "mentality_interceptions": 0.78,
+  "goalkeeping_diving": 0.85,
+  "goalkeeping_handling": 0.82,
+  "goalkeeping_kicking": 0.78,
+  "goalkeeping_positioning": 0.83,
+  "goalkeeping_reflexes": 0.87,
+  "pass_accuracy": 0.85,
+  "duel_win_rate": 0.7,
+  "pressings": 0.88,
+  "carries": 0.8,
+  "goal_ratio": 0.72
+}
