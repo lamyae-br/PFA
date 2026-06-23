@@ -5,18 +5,28 @@ Tests des routes publiques — Stats et Nations
 
 import os
 import sys
-import pytest
 from unittest.mock import MagicMock, patch
+
+# ── Mocker torch AVANT tout import du projet ──────────────────
+# data_loader.py importe torch au niveau module ; on injecte un faux module
+_torch_mock = MagicMock()
+_torch_mock.load = MagicMock(return_value=MagicMock())
+_torch_mock.no_grad = MagicMock(return_value=MagicMock(__enter__=MagicMock(return_value=None), __exit__=MagicMock(return_value=False)))
+sys.modules.setdefault("torch", _torch_mock)
+sys.modules.setdefault("torch.nn", MagicMock())
+sys.modules.setdefault("torch.nn.functional", MagicMock())
+sys.modules.setdefault("torch_geometric", MagicMock())
+sys.modules.setdefault("torch_geometric.nn", MagicMock())
+sys.modules.setdefault("torch_geometric.data", MagicMock())
+
+import pytest
+import pandas as pd
 from fastapi.testclient import TestClient
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 
-# ──────────────────────────────────────────────
-# Mock des données (évite de charger PyTorch)
-# ──────────────────────────────────────────────
-
-import pandas as pd
+# ── Données mock ─────────────────────────────────────────────
 
 MOCK_PLAYERS = pd.DataFrame({
     "player_id":        [0, 1, 2, 3],
@@ -45,16 +55,14 @@ MOCK_DATA.edge_index.shape = (2, 100)
 def client():
     with patch("data_loader.load_all_data"), \
          patch("data_loader.get_players", return_value=MOCK_PLAYERS), \
-         patch("data_loader.get_data",    return_value=MOCK_DATA):
+         patch("data_loader.get_data", return_value=MOCK_DATA):
 
         from main import app
         with TestClient(app) as c:
             yield c
 
 
-# ──────────────────────────────────────────────
-# Tests route racine
-# ──────────────────────────────────────────────
+# ── Tests route racine ────────────────────────────────────────
 
 def test_root_returns_200(client):
     resp = client.get("/")
@@ -72,9 +80,7 @@ def test_root_contains_endpoints(client):
     assert "endpoints" in data
 
 
-# ──────────────────────────────────────────────
-# Tests route /api/stats (publique)
-# ──────────────────────────────────────────────
+# ── Tests route /api/stats ────────────────────────────────────
 
 def test_stats_returns_200(client):
     resp = client.get("/api/stats")
@@ -95,13 +101,11 @@ def test_stats_moroccan_players(client):
 
 def test_stats_has_gnn_metrics(client):
     data = client.get("/api/stats").json()
-    assert "gnn_r2"  in data
+    assert "gnn_r2" in data
     assert "gnn_mae" in data
 
 
-# ──────────────────────────────────────────────
-# Tests route /api/nations-list (publique)
-# ──────────────────────────────────────────────
+# ── Tests route /api/nations-list ────────────────────────────
 
 def test_nations_list_returns_200(client):
     resp = client.get("/api/nations-list?min_players=1")
@@ -110,14 +114,12 @@ def test_nations_list_returns_200(client):
 
 def test_nations_list_structure(client):
     data = client.get("/api/nations-list?min_players=1").json()
-    assert "total"   in data
+    assert "total" in data
     assert "nations" in data
     assert isinstance(data["nations"], list)
 
 
-# ──────────────────────────────────────────────
-# Tests route /api/evaluation (publique)
-# ──────────────────────────────────────────────
+# ── Tests route /api/evaluation ──────────────────────────────
 
 def test_evaluation_returns_200(client):
     resp = client.get("/api/evaluation")
@@ -130,9 +132,7 @@ def test_evaluation_has_methods(client):
     assert len(data["methods"]) > 0
 
 
-# ──────────────────────────────────────────────
-# Tests d'authentification
-# ──────────────────────────────────────────────
+# ── Tests authentification ────────────────────────────────────
 
 def test_register_missing_fields(client):
     resp = client.post("/api/auth/register", json={})
