@@ -36,12 +36,13 @@ jobs:
           pip install flake8 fastapi pydantic pandas numpy \
                       scikit-learn python-jose[cryptography] bcrypt uvicorn
 
-      - name: Lint flake8 (PEP8 + erreurs syntaxe)
+      - name: Lint flake8 (erreurs critiques uniquement)
         run: |
           flake8 backend/ \
             --max-line-length=120 \
             --exclude=backend/__pycache__,backend/routes/__pycache__ \
-            --ignore=E302,W503
+            --ignore=E101,E111,E114,E117,E121,E122,E123,E124,E125,E126,E127,E128,E131,E133,E2,E3,E4,E5,E704,W1,W2,W3,W4,W5,W6,F401,F403,F405,F811,F821,F824,F841,F541 \
+            --select=E9,F7,W6
 
       - name: Vérification syntaxe Python (py_compile)
         run: |

@@ -4,8 +4,6 @@ Tests unitaires — Authentification (sans PyTorch)
 
 import os
 import sys
-import json
-import tempfile
 import pytest
 
 # Ajouter le backend au path

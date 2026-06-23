@@ -17,7 +17,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 # ──────────────────────────────────────────────
 
 import pandas as pd
-import numpy as np
 
 MOCK_PLAYERS = pd.DataFrame({
     "player_id":        [0, 1, 2, 3],
