@@ -1,0 +1,60 @@
+services:
+  # ── Base de données MySQL ───────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: pfa_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: pfa_root_pwd
+      MYSQL_DATABASE: pfa_gnn
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ppfa_root_pwd"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── Backend FastAPI + GNN ───────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: pfa_backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: mysql          # nom du service docker, PAS localhost
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: pfa_root_pwd
+      MYSQL_DATABASE: pfa_gnn
+      JWT_SECRET_KEY: pfa-gnn-super-secret-key-change-in-prod-2026
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app                  # code + modèles .pt + CSV montés en direct
+
+  # ── Frontend React + Vite ───────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pfa_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://localhost:8000/api
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules        # garde les node_modules du conteneur
+
+volumes:
+  mysql_data:

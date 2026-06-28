@@ -76,8 +76,10 @@ def editor_composition(
 ):
     """
     Recalcule la composition optimale à partir d'un vecteur PFA custom.
-    Score = cosinus(features_joueur_18D, pfa_custom_18D).
-    Le delta (entrants/sortants) compare avec la composition GNN par défaut.
+    Joueurs de champ : score = 0.70*cosinus(features, vecteur_custom)
+    + 0.30*overall (réactif au vecteur édité). Gardiens : score PFA officiel
+    conservé (logique gardien spécifique). Le delta (entrants/sortants)
+    compare avec la composition GNN par défaut.
     """
     df_all   = get_players()
     features = get_features()   # liste ordonnée de 18 features
@@ -101,18 +103,40 @@ def editor_composition(
     else:
         df = df_all.copy()
 
-    # ── Construire le vecteur PFA custom (clamp 0–1) ──
-    pfa_custom = np.array(
-        [float(req.vector.get(f, 0.5)) for f in features],
-        dtype=np.float32
-    )
-    pfa_custom = np.clip(pfa_custom, 0.0, 1.0)
+    # ── Vecteur PFA custom (clamp 0–1) ──
+    # Construit dans le MÊME ordre que les colonnes (get_features()),
+    # ce qui élimine tout décalage d'index entre le frontend et le backend.
+    custom_vec = np.array([float(req.vector.get(f, 0.5)) for f in features],
+                          dtype=np.float32)
+    custom_vec = np.clip(custom_vec, 0.0, 1.0)
 
-    # ── Calcul cosinus pour tous les joueurs (vectorisé, < 5ms) ──
-    X = df[features].fillna(0.0).values.astype(np.float32)    # (N, 18)
-    custom_scores = cosine_similarity(X, pfa_custom.reshape(1, -1)).flatten()
+    # ── Score personnalisé : réactif au vecteur pour les joueurs de champ,
+    #    stable pour les gardiens ──────────────────────────────────────────
+    #
+    # JOUEURS DE CHAMP :
+    #   custom_score = 0.70 * cosinus(features, vecteur_custom) + 0.30 * overall
+    #   Le cosinus est calculé contre le vecteur ÉDITÉ : quand l'utilisateur
+    #   modifie un attribut, le classement change réellement (le cosinus est
+    #   très discriminant entre profils de joueurs de champ). Au vecteur par
+    #   défaut, cosinus(features, défaut) ≈ score GNN (le GNN est entraîné à
+    #   reproduire cette similarité, R²=0.97) : la composition reste donc
+    #   pratiquement identique à la composition normale.
+    #
+    # GARDIENS :
+    #   On conserve le score PFA officiel (df["pfa_score"]), qui suit la
+    #   logique gardien spécifique (0.65 * cosinus(features, pfa_gkp) +
+    #   0.35 * overall). Les cosinus des gardiens étant tous très proches,
+    #   c'est l'overall qui les départage : sans lui, le mauvais gardien
+    #   serait sélectionné. Le gardien reste donc stable (Bounou).
+    X = df[features].fillna(0.0).values.astype(np.float32)        # (N, 18)
+    cos_custom   = cosine_similarity(X, custom_vec.reshape(1, -1)).flatten()
+    overall_norm = df["overall"].fillna(0.5).values.astype(np.float32)
+
+    field_score = 0.70 * cos_custom + 0.30 * overall_norm
+    is_gkp = (df["poste"] == "GKP").values
+
     df = df.copy()
-    df["custom_score"] = custom_scores
+    df["custom_score"] = np.where(is_gkp, df["pfa_score"].values, field_score)
 
     # ── Composition GNN de référence (pour le delta) ──
     FORMATION = FORMATIONS[req.formation]

@@ -22,9 +22,7 @@ export default function Home() {
           transition={{ duration: 0.7 }}
           className="lg:col-span-8"
         >
-          <div className="font-mono text-xs tracking-widest uppercase text-accent mb-6">
-            Projet Fin d'Année · 2026
-          </div>
+          
           <h1 className="font-display text-6xl md:text-8xl lg:text-9xl leading-[0.85] tracking-tight">
             Sélection<br/>
             <span className="text-accent">Optimale</span><br/>

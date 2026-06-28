@@ -20,6 +20,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import composition, players, pfa, stats, nations, auth, compare, graph, editor
 from data_loader import load_all_data
+from database import init_db
 
 # ─────────────────────────────────────────────
 # INITIALISATION
@@ -27,6 +28,10 @@ from data_loader import load_all_data
 print("=" * 55)
 print("  DÉMARRAGE DU BACKEND PFA GNN — MULTI NATIONS")
 print("=" * 55)
+
+# Initialisation de la base MySQL (création base + table users)
+print("  [0/6] Initialisation de la base MySQL...")
+init_db()
 
 # Chargement unique des données au démarrage
 load_all_data()

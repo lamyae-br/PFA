@@ -1,0 +1,24 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Node (le frontend a sa propre image)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Secrets locaux (les variables viennent de docker-compose)
+backend/.env
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
