@@ -1,29 +1,15 @@
 """
-Tests unitaires — Authentification (sans PyTorch)
+Tests unitaires — Authentification (sans PyTorch ni MySQL réel)
+
+L'isolation de la base est assurée par la fixture autouse `fake_db`
+définie dans conftest.py (base en mémoire vidée à chaque test).
 """
 
 import os
 import sys
-import pytest
 
 # Ajouter le backend au path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
-
-# ──────────────────────────────────────────────
-# Fixtures
-# ──────────────────────────────────────────────
-
-@pytest.fixture(autouse=True)
-def tmp_users_file(monkeypatch, tmp_path):
-    """Utilise un fichier users.json temporaire pour chaque test."""
-    users_file = tmp_path / "users.json"
-    users_file.write_text('{"users": []}', encoding="utf-8")
-    monkeypatch.setenv("USERS_FILE_OVERRIDE", str(users_file))
-
-    import auth
-    monkeypatch.setattr(auth, "USERS_FILE", str(users_file))
-    return users_file
 
 
 # ──────────────────────────────────────────────

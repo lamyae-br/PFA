@@ -50,6 +50,7 @@ jobs:
           python -m py_compile backend/data_loader.py
           python -m py_compile backend/model.py
           python -m py_compile backend/auth.py
+          python -m py_compile backend/database.py
           python -m py_compile backend/dependencies.py
           python -m py_compile backend/schemas.py
           for f in backend/routes/*.py; do
@@ -78,8 +79,9 @@ jobs:
       - name: Installer les dépendances de test
         run: |
           pip install --upgrade pip
-          pip install pytest httpx fastapi pydantic pandas numpy \
-                      scikit-learn python-jose[cryptography] bcrypt uvicorn
+          pip install pytest "httpx<0.28" fastapi pydantic pandas numpy \
+                      scikit-learn python-jose[cryptography] bcrypt uvicorn \
+                      python-dotenv
 
       - name: Lancer les tests
         run: |
